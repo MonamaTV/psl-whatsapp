@@ -39,50 +39,61 @@ export const getPSLTable = async () => {
 };
 
 export const getPSLResults = async () => {
-  const resultsArr = [];
-  const { data } = await axiosPSLInstance().get("/?type=results");
+  try {
+    const resultsArr = [];
+    const { data } = await axiosPSLInstance().get("/?type=results");
 
-  const $ = cheerio.load(data);
+    const $ = cheerio.load(data);
 
-  const results = $("#table-standings-results tbody");
-  results.each((_, body) => {
-    const row = $(body).find("tr");
-    const team1 = row.find(".results-team1 .team-meta__name").text();
-    const team1Badge = row
-      .find(".results-team1 .team-meta .team-meta__logo img")
-      .attr("src");
-    const team2 = row.find(".results-team2 .team-meta__name").text();
-    const team2Badge = row
-      .find(".results-team2 .team-meta .team-meta__logo img")
-      .attr("src");
-    const host = row
-      .find(".results-footer-row .results-footer-block")
-      .text()
-      .split("-");
+    const results = $("#table-standings-results tbody");
+    results.each((_, body) => {
+      const row = $(body).find("tr");
+      const team1 = row.find(".results-team1 .team-meta__name").text();
+      const team1Badge = row
+        .find(".results-team1 .team-meta .team-meta__logo img")
+        .attr("src");
+      const team2 = row.find(".results-team2 .team-meta__name").text();
+      const team2Badge = row
+        .find(".results-team2 .team-meta .team-meta__logo img")
+        .attr("src");
+      const host = row
+        .find(".results-footer-row .results-footer-block")
+        .text()
+        .split("-");
 
-    const location = host[1];
-    const date = host[0];
-    const score = row.find(".results-score span").text().split("-");
-    const score1 = score[0];
-    const score2 = score[1];
+      const location = host[1];
+      const date = host[0];
+      const score = row.find(".results-score span").text().split("-");
+      let score1;
+      let score2;
+      if (score.includes(" Postponed ")) {
+        score1 = "[Postponed]";
+        score2 = "";
+      } else {
+        score1 = score[0];
+        score2 = score[1];
+      }
 
-    resultsArr.push({
-      host: {
-        name: team1,
-        score: score1.trim(),
-        badge: team1Badge,
-      },
-      away: {
-        name: team2,
-        score: score2.trim(),
-        badge: team2Badge,
-      },
-      location: location.trim(),
-      date: date.trim(),
+      resultsArr.push({
+        host: {
+          name: team1,
+          score: score1.trim(),
+          badge: team1Badge,
+        },
+        away: {
+          name: team2,
+          score: score2.trim(),
+          badge: team2Badge,
+        },
+        location: location.trim(),
+        date: date.trim(),
+      });
     });
-  });
 
-  return resultsArr;
+    return resultsArr;
+  } catch (error) {
+    console.log(error);
+  }
 };
 
 export const getPSLFixtures = async () => {

@@ -1,8 +1,8 @@
+import { errorMessage, msg } from "../messages.js";
 import { getPSLFixtures, getPSLResults, getPSLTable } from "../scraper/psl.js";
 import { sendWhatsappMessage } from "../twilio.js";
 
 export const fetchTable = async (req, res) => {
-  ///
   try {
     const results = await getPSLTable();
     if (req.query?.team) {
@@ -62,52 +62,45 @@ export const fetchResults = async (req, res) => {
   }
 };
 
-export const fetchFixtures = async (req, res) => {
-  // console.log(req.body);
+export const PSLUpdates = async (req, res) => {
   const sender = req.body.To;
   const receiver = req.body.From;
   try {
-    const message = req.body.Body;
-    if (message === "table") {
+    const message = req.body?.Body;
+    if (!message) {
+      await sendWhatsappMessage(sender, receiver, errorMessage);
+      return;
+    }
+    if (message.toLowerCase() === "hi") {
+      await sendWhatsappMessage(sender, receiver, msg);
+      return;
+    } else if (message.toLowerCase() === "table") {
       const results = await getPSLTable();
-      let strMessage = "PSL Table \n";
+      let strMessage = "*PSL Table* \n\n";
       results.forEach((result) => {
         strMessage += `${result.position}. ${result.team}: ${result.win} W, ${result.lost} L, ${result.draw} D, ${result.points} PTS\n`;
       });
       await sendWhatsappMessage(sender, receiver, strMessage);
-    }
-    if (message === "results") {
+    } else if (message.toLowerCase() === "results") {
       const results = await getPSLResults();
-
       let resultMessage = "";
       results.slice(0, 10).forEach(({ host, away, location, date }) => {
-        resultMessage += `${host.name} ${host.score} - ${away.score} ${away.name}
-        ${location} - ${date}\n`;
+        resultMessage += `${host.name} ${host.score} - ${away.score} ${away.name}\n`;
+        resultMessage += `${location} - ${date}\n\n`;
       });
       await sendWhatsappMessage(sender, receiver, resultMessage);
-    }
-    if (message === "fixtures") {
-    }
+    } else if (message.toLowerCase() === "fixtures") {
+      const results = await getPSLFixtures();
 
-    // Can sort by month, team
-    // if (req.query?.team) {
-    //   const result = results.find((team) =>
-    //     team.team.toLowerCase().includes(req.query.team.toLowerCase())
-    //   );
-    //   return res.json({
-    //     message: "Team information",
-    //     success: true,
-    //     data: result,
-    //   });
-    // }
-    // res.status(200).json({
-    //   message: "PSL results",
-    //   success: true,
-    //   data: results,
-    //   results: results.length,
-    // });
+      let strMessages = "";
+      results.forEach(({ host, away, location, date }) => {
+        strMessages += `${host.name} vs. ${away.name}\n${location} - ${date} \n\n`;
+      });
+      await sendWhatsappMessage(sender, receiver, strMessages);
+    } else {
+      await sendWhatsappMessage(sender, receiver, errorMessage);
+    }
   } catch (error) {
-    console.log(error.message);
     return res.status(400).json({
       message: "Failed to get PSL fixtures",
       success: false,
