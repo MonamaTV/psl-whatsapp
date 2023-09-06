@@ -94,7 +94,9 @@ export const PSLUpdates = async (req, res) => {
 
       let strMessages = "";
       results.forEach(({ host, away, location, date }) => {
-        strMessages += `${host.name} vs. ${away.name}\n${location} - ${date} \n\n`;
+        strMessages += `${host.name} vs. ${away.name}\n${location} ${
+          date && "-"
+        } ${date} \n\n`;
       });
       await sendWhatsappMessage(sender, receiver, strMessages);
     } else {
