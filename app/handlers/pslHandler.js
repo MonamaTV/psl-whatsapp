@@ -83,7 +83,7 @@ export const PSLUpdates = async (req, res) => {
       await sendWhatsappMessage(sender, receiver, strMessage);
     } else if (message.toLowerCase() === "results") {
       const results = await getPSLResults();
-      let resultMessage = "";
+      let resultMessage = "*Results* \n\n";
       results.slice(0, 10).forEach(({ host, away, location, date }) => {
         resultMessage += `${host.name} ${host.score} - ${away.score} ${away.name}\n`;
         resultMessage += `${location} - ${date}\n\n`;
@@ -92,7 +92,7 @@ export const PSLUpdates = async (req, res) => {
     } else if (message.toLowerCase() === "fixtures") {
       const results = await getPSLFixtures();
 
-      let strMessages = "";
+      let strMessages = "*Upcoming games*\n\n";
       results.forEach(({ host, away, location, date }) => {
         strMessages += `${host.name} vs. ${away.name}\n${location} ${
           date && "-"
