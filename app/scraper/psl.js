@@ -121,8 +121,17 @@ export const getPSLFixtures = async () => {
       .text()
       .split("-");
 
-    const location = host[1];
-    const date = host[0];
+    let location = "";
+    let date = "";
+    if (host[0].trim().includes("Postponed")) {
+      location = " [Postponed] ";
+      date = " ";
+    } else {
+      location = host[1];
+      date = host[0];
+    }
+
+    // console.log(location, date);
 
     resultsArr.push({
       host: {
