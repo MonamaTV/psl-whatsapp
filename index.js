@@ -10,6 +10,8 @@ app.use(express.urlencoded({ extended: false }));
 
 app.use("/api/psl", plsRoutes);
 
-app.listen(3000, () => {
+const PORT = process.env.PORT || 3000;
+
+app.listen(PORT, () => {
   console.log("The server is running on PORT:3000");
 });
