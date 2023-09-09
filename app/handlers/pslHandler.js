@@ -7,6 +7,7 @@ export const PSLUpdates = async (req, res) => {
   const receiver = req.body.From;
   try {
     const message = req.body?.Body;
+    console.log(message);
     if (!message) {
       await sendWhatsappMessage(sender, receiver, errorMessage);
 
